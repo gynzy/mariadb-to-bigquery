@@ -58,7 +58,7 @@ module.exports = class MySQLtoBigQuery {
         };
 
         const table = this.dataset.table(tableName);
-        table.exists().then(function (data) {
+        table.exists().then((data) => {
           var exists = data[0];
           if (exists) {
             console.log('Table exists, will use existing schema, beware of schema changes, not updating for now...');
@@ -91,7 +91,7 @@ module.exports = class MySQLtoBigQuery {
       dataset.query(query).then((rows) => {
         // Handle results here.
         console.log('Found existing max(id): ', rows);
-        lastId = rows[0][0].maxId;
+        lastId = rows[0][0].maxId !== null ? rows[0][0].maxId : 0;
         console.log(`Selecting new rows from ${lastId} with a limit of ${limit}.`);
         let query = this.connection.query(`SELECT * FROM ${tableName} WHERE id > ${lastId} ORDER BY id ASC LIMIT ${limit};`);
         query.on('result', (res) => {
