@@ -35,5 +35,7 @@ $ npm start
 - pass the environment variables in `.env` to the container
 - and as an extra, pass GCE_JSON environment variable which should contain a base64 encoded service account (json)
 
+## Usage with Kubernetes
+- [Example](kubernetes/job.yaml)
 ## License
 MIT

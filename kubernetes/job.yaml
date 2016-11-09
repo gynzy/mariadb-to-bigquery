@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: my-etl
+spec:
+  template:
+    spec:
+      containers:
+        - name: my-etl
+          image: quay.io/gynzy/mariadb-to-bigquery:latest
+          env:
+          - name: GCE_JSON
+            valueFrom:
+              secretKeyRef:
+                name: secrets
+                key: gcejson
+          - name: QUERY_LIMIT
+            value: "500000"
+          - name: RDS_HOST
+            value: localhost
+          - name: RDS_USER
+            valueFrom:
+              secretKeyRef:
+                key: dbuser
+                name: secrets
+          - name: RDS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: dbpass
+                name: secrets
+          - name: RDS_DATABASE
+            value: my-db
+          - name: BQ_PROJECT_ID
+            value: my-project
+          - name: BQ_DATASET
+            value: some-dataset
+          - name: TABLES
+            value: A,B,C
+      restartPolicy: Never
