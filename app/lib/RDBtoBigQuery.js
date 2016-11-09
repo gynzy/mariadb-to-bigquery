@@ -61,7 +61,7 @@ module.exports = class MySQLtoBigQuery {
         table.exists().then((data) => {
           var exists = data[0];
           if (exists) {
-            console.log('Table exists, will use existing schema, beware of schema changes, not updating for now...');
+            console.log(`Table ${tableName} exists in BigQuery, will use existing schema, beware of schema changes, not updating for now...`);
             //TODO update schema is needed
             resolve(json);
           } else {
@@ -79,8 +79,6 @@ module.exports = class MySQLtoBigQuery {
   }
 
   _insertRecords(fields, tableName, dataset, limit) {
-    this.fields = fields;
-
     const table = dataset.table(tableName);
 
     let writeStream = table.createWriteStream('json');
@@ -90,14 +88,14 @@ module.exports = class MySQLtoBigQuery {
       var query = 'SELECT max(id) as maxId FROM [' + tableName + '] LIMIT 1';
       dataset.query(query).then((rows) => {
         // Handle results here.
-        console.log('Found existing max(id): ', rows);
+        console.log(`Found existing max(id) for ${tableName}: `, rows);
         lastId = rows[0][0].maxId !== null ? rows[0][0].maxId : 0;
-        console.log(`Selecting new rows from ${lastId} with a limit of ${limit}.`);
+        console.log(`Selecting new rows for ${tableName} from ${lastId} with a limit of ${limit}.`);
         let query = this.connection.query(`SELECT * FROM ${tableName} WHERE id > ${lastId} ORDER BY id ASC LIMIT ${limit};`);
         query.on('result', (res) => {
           // `res` is a streams2+ Readable object stream
           console.log('Streaming..');
-          res.pipe(esMap((data, cb) => cb(null, this._fix(data))))
+          res.pipe(esMap((data, cb) => cb(null, this._fix(data, fields))))
             .pipe(ndjson.serialize())
             .pipe(writeStream)
             .on('complete', function (job) {
@@ -114,12 +112,12 @@ module.exports = class MySQLtoBigQuery {
     });
   }
 
-  _fix(row) {
+  _fix(row, fields) {
     let i = 0;
     for (var key in row) {
       if (row[key] === '0000-00-00 00:00:00') {
         row[key] = null;
-      } else if (this.fields[i].type === 'BOOLEAN') {
+      } else if (fields[i].type === 'BOOLEAN') {
         row[key] = Boolean(row[key]);
       }
       i++;
