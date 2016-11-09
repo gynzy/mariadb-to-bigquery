@@ -20,7 +20,7 @@ export RDS_PASSWORD=xxxxxxxx
 export RDS_DATABASE=xxxxxxxx
 export BQ_PROJECT_ID=xxxxxxxx
 export BQ_DATASET=xxxxxxxx
-export TABLES=Komma,Separated,List,Of,Tables,To,Copy
+export TABLES=Comma,Separated,List,Of,Tables,To,Copy
 ```
 
 Then put a Google service account json file in `/app/google-keyfile.json`. 
