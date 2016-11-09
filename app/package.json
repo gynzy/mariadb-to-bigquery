@@ -1,0 +1,33 @@
+{
+  "name": "mariadb-to-bigquery",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gynzy/mariadb-to-bigquery.git"
+  },
+  "version": "0.0.1",
+  "description": "Data Transfer from MariaDB to BigQuery",
+  "main": "index.js",
+  "scripts": {
+    "start": "nf run node index.js",
+    "prod": "ENVIRONMENT=production node index.js"
+  },
+  "keywords": [
+    "bigquery",
+    "mariadb"
+  ],
+  "files": [
+    "lib",
+    "index.js"
+  ],
+  "author": "Ralf Schimmel <ralf@gynzy.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@google-cloud/bigquery": "^0.4.0",
+    "event-stream": "^3.3.4",
+    "mariasql": "mscdex/node-mariasql.git#master",
+    "ndjson": "^1.4.3"
+  },
+  "devDependencies": {
+    "foreman": "^2.0.0"
+  }
+}
