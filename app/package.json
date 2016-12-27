@@ -24,7 +24,7 @@
   "dependencies": {
     "@google-cloud/bigquery": "^0.4.0",
     "event-stream": "^3.3.4",
-    "mariasql": "mscdex/node-mariasql.git#master",
+    "mysql": "^2.12.0",
     "ndjson": "^1.4.3"
   },
   "devDependencies": {

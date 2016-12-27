@@ -1,4 +1,4 @@
-let MariaSQL = require('mariasql');
+let mysql = require('mysql');
 let bigquery = require('@google-cloud/bigquery');
 let esMap = require('event-stream').map;
 
@@ -10,12 +10,14 @@ module.exports = class MySQLtoBigQuery {
     this.limit = process.env.QUERY_LIMIT || 5;
 
     // init MySQL
-    this.connection = new MariaSQL({
+    this.connection = mysql.createConnection({
       host: process.env.RDS_HOST,
       user: process.env.RDS_USER,
       password: process.env.RDS_PASSWORD,
-      db: process.env.RDS_DATABASE
+      database: process.env.RDS_DATABASE
     });
+
+    this.connection.connect();
 
     // init BigQuery
     this.bq = bigquery({
@@ -26,8 +28,8 @@ module.exports = class MySQLtoBigQuery {
     this.dataset = this.bq.dataset(process.env.BQ_DATASET);
   }
 
-  exec(tableNames) {
-    return Promise.all(tableNames.map(table => this._syncTable(table)));
+  exec(table) {
+    return this._syncTable(table);
   }
 
   _syncTable(tableName) {
@@ -92,10 +94,8 @@ module.exports = class MySQLtoBigQuery {
         lastId = rows[0][0].maxId !== null ? rows[0][0].maxId : 0;
         console.log(`Selecting new rows for ${tableName} from ${lastId} with a limit of ${limit}.`);
         let query = this.connection.query(`SELECT * FROM ${tableName} WHERE id > ${lastId} ORDER BY id ASC LIMIT ${limit};`);
-        query.on('result', (res) => {
-          // `res` is a streams2+ Readable object stream
-          console.log('Streaming..');
-          res.pipe(esMap((data, cb) => cb(null, this._fix(data, fields))))
+        query.stream({highWaterMark: 100})
+        .pipe(esMap((data, cb) => cb(null, this._fix(data, fields))))
             .pipe(ndjson.serialize())
             .pipe(writeStream)
             .on('complete', function (job) {
@@ -107,7 +107,6 @@ module.exports = class MySQLtoBigQuery {
                 });
             })
             .on('error', reject);
-        });
       });
     });
   }
@@ -118,7 +117,7 @@ module.exports = class MySQLtoBigQuery {
       if (row[key] === '0000-00-00 00:00:00') {
         row[key] = null;
       } else if (fields[i].type === 'BOOLEAN') {
-        row[key] = Boolean(row[key]);
+        row[key] = row[key].lastIndexOf(1) !== -1;
       }
       i++;
     }
