@@ -132,7 +132,7 @@ module.exports = class MySQLtoBigQuery {
       return 'INTEGER'
     } else if (type === 'datetime') {
       return 'TIMESTAMP'
-    } else if (type === 'float' || type === 'double') {
+    } else if (type === 'float' || type === 'double' || type.indexOf('decimal') > -1) {
       return 'FLOAT';
     }
     return 'STRING';
