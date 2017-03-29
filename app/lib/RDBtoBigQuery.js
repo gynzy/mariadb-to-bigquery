@@ -173,6 +173,8 @@ module.exports = class MySQLtoBigQuery {
       return 'TIMESTAMP'
     } else if (type === 'float' || type === 'double' || type.indexOf('decimal') > -1) {
       return 'FLOAT';
+    } else if (type.indexOf('binary') > -1) {
+      return 'BYTES';
     }
     return 'STRING';
   }
