@@ -157,6 +157,8 @@ module.exports = class MySQLtoBigQuery {
         row[key] = null;
       } else if (fields[i].type === 'BOOLEAN') {
         row[key] = row[key] !== null ? row[key].lastIndexOf(1) !== -1 : null;
+      }  else if (fields[i].type === 'BYTES') {
+        row[key] = null;
       }
       i++;
     }
