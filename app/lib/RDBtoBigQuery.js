@@ -63,6 +63,10 @@ module.exports = class MySQLtoBigQuery {
           }
         };
 
+        console.log('=============== BQ schema ===================");
+        console.log(options);
+        console.log('=============== BQ schema ===================");
+        
         const table = this.dataset.table(tableName);
         table.exists().then((data) => {
           var exists = data[0];
