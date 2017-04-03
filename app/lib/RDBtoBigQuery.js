@@ -63,6 +63,10 @@ module.exports = class MySQLtoBigQuery {
           }
         };
 
+        console.log('=============== BQ schema ===================');
+        console.log(options);
+        console.log('=============== BQ schema ===================');
+        
         const table = this.dataset.table(tableName);
         table.exists().then((data) => {
           var exists = data[0];
@@ -157,6 +161,8 @@ module.exports = class MySQLtoBigQuery {
         row[key] = null;
       } else if (fields[i].type === 'BOOLEAN') {
         row[key] = row[key] !== null ? row[key].lastIndexOf(1) !== -1 : null;
+      }  else if (fields[i].type === 'BYTES') {
+        row[key] = null;
       }
       i++;
     }
@@ -173,6 +179,8 @@ module.exports = class MySQLtoBigQuery {
       return 'TIMESTAMP'
     } else if (type === 'float' || type === 'double' || type.indexOf('decimal') > -1) {
       return 'FLOAT';
+    } else if (type.indexOf('binary') > -1) {
+      return 'BYTES';
     }
     return 'STRING';
   }
