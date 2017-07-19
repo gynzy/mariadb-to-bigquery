@@ -12,6 +12,7 @@ tablesToSend.forEach((table) => {
     });
   } else {
     console.error('table option not formatted correct, use comma separated list of `tablename:append` or `tablename:snapshot`, got: ' + table);
+    process.exit(1);
   }
 });
 result.then(function (result) {
@@ -19,4 +20,5 @@ result.then(function (result) {
   process.exit(0);
 }).catch(function (error) {
   console.log(error);
+    process.exit(1);
 });
