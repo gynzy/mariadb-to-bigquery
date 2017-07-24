@@ -19,6 +19,6 @@ result.then(function (result) {
   console.log('All good, result: ', result);
   process.exit(0);
 }).catch(function (error) {
-  console.log(error);
-    process.exit(1);
+  console.error('Error occured sending tables:', error);
+  process.exit(1);
 });
