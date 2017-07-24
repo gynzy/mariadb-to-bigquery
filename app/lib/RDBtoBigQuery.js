@@ -142,12 +142,16 @@ module.exports = class MySQLtoBigQuery {
           .pipe(ndjson.serialize())
           .pipe(writeStream)
           .on('complete', function (job) {
-            job.on('error', console.log)
-              .on('complete', function (metadata) {
-                console.log('job completed', metadata);
-                console.log('Done in ', (new Date().getTime() - start) / 1000, 'seconds');
-                resolve();
-              });
+            const runtimeInSeconds = (new Date().getTime() - start) / 1000;
+            job.on('error', function (error) {
+              console.error('Job failed with error', error);
+              console.error('Failed after', runtimeInSeconds, 'seconds');
+              reject(error);
+            }).on('complete', function (metadata) {
+              console.log('Job completed', metadata);
+              console.log('Done in ', runtimeInSeconds, 'seconds');
+              resolve();
+            });
           })
           .on('error', reject);
       });
