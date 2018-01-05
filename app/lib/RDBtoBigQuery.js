@@ -39,7 +39,7 @@ module.exports = class MySQLtoBigQuery {
   _syncTable(tableName, loadMethod) {
     return new Promise((resolve, reject) => {
       this._createOrUpdateTable(tableName, loadMethod).then(fields => {
-        return this._insertRecords(fields, tableName, this.dataset, this.limit);
+        return this._insertRecords(fields, tableName, this.dataset, this.limit, loadMethod);
       }).then(_ => {
         resolve();
       }).catch(reject);
@@ -66,7 +66,7 @@ module.exports = class MySQLtoBigQuery {
         console.log('=============== BQ schema ===================');
         console.log(options);
         console.log('=============== BQ schema ===================');
-        
+
         const table = this.dataset.table(tableName);
         table.exists().then((data) => {
           var exists = data[0];
@@ -121,20 +121,21 @@ module.exports = class MySQLtoBigQuery {
     });
   }
 
-  _insertRecords(fields, tableName, dataset, limit) {
+  _insertRecords(fields, tableName, dataset, limit, loadMethod) {
     const table = dataset.table(tableName);
 
     let writeStream = table.createWriteStream('json');
     let start = new Date().getTime();
     return new Promise((resolve, reject) => {
       let lastId = 0;
-      var query = 'SELECT max(id) as maxId FROM [' + tableName + '] LIMIT 1';
+      var select = (loadMethod === LOAD_METHOD_SNAPSHOT) ? 'sum(0)' : 'max(id)'
+      var query = 'SELECT ' + select + ' as maxId FROM [' + tableName + '] LIMIT 1';
       dataset.query(query).then((rows) => {
         // Handle results here.
-        console.log(`Found existing max(id) for ${tableName}: `, rows);
         lastId = rows[0][0].maxId !== null ? rows[0][0].maxId : 0;
         console.log(`Selecting new rows for ${tableName} from ${lastId} with a limit of ${limit}.`);
-        let query = this.connection.query(`SELECT * FROM ${tableName} WHERE id > ${lastId} ORDER BY id ASC LIMIT ${limit};`);
+        let query_suffix = (loadMethod === LOAD_METHOD_SNAPSHOT) ? '' : (' WHERE id > ' + lastId + ' ORDER BY id ASC LIMIT ' + limit)
+        let query = this.connection.query(`SELECT * FROM ${tableName}${query_suffix};`);
         query.stream({
             highWaterMark: 100
           })
@@ -164,7 +165,7 @@ module.exports = class MySQLtoBigQuery {
       if (row[key] === '0000-00-00 00:00:00') {
         row[key] = null;
       } else if (fields[i].type === 'BOOLEAN') {
-        row[key] = row[key] !== null ? row[key].lastIndexOf(1) !== -1 : null;
+        row[key] = row[key] !== null ? row[key].toString().lastIndexOf(1) !== -1 : null;
       }  else if (fields[i].type === 'BYTES') {
         row[key] = null;
       }
