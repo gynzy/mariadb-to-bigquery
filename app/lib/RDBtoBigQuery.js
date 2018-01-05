@@ -166,7 +166,7 @@ module.exports = class MySQLtoBigQuery {
       if (row[key] === '0000-00-00 00:00:00') {
         row[key] = null;
       } else if (fields[i].type === 'BOOLEAN') {
-        row[key] = row[key] !== null ? row[key].toString().lastIndexOf(1) !== -1 : null;
+        row[key] = row[key] !== null ? row[key].toString().lastIndexOf('1') !== -1 : null;
       }  else if (fields[i].type === 'BYTES') {
         row[key] = null;
       }
