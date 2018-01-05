@@ -132,6 +132,7 @@ module.exports = class MySQLtoBigQuery {
       var query = 'SELECT ' + select + ' as maxId FROM [' + tableName + '] LIMIT 1';
       dataset.query(query).then((rows) => {
         // Handle results here.
+        console.log(`Found existing maxId for ${tableName}: `, rows);
         lastId = rows[0][0].maxId !== null ? rows[0][0].maxId : 0;
         console.log(`Selecting new rows for ${tableName} from ${lastId} with a limit of ${limit}.`);
         let query_suffix = (loadMethod === LOAD_METHOD_SNAPSHOT) ? '' : (' WHERE id > ' + lastId + ' ORDER BY id ASC LIMIT ' + limit)
