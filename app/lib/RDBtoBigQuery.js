@@ -53,13 +53,16 @@ module.exports = class MySQLtoBigQuery {
         if (error) return reject(error);
 
         const json = rows.map(row => Object({
-          name: row.Field,
-          type: this._convertToBqColumnType(row.Type)
+          bqField: {
+            name: row.Field,
+            type: this._convertToBqColumnType(row.Type)
+          },
+          cloudSqlType: row.Type
         }));
 
         const options = {
           schema: {
-            fields: json
+            fields: json.map(obj => obj.bqField)
           }
         };
 
@@ -165,9 +168,13 @@ module.exports = class MySQLtoBigQuery {
     for (var key in row) {
       if (row[key] === '0000-00-00 00:00:00') {
         row[key] = null;
-      } else if (fields[i].type === 'BOOLEAN') {
-        row[key] = row[key] !== null ? row[key].toString().lastIndexOf('1') !== -1 : null;
-      }  else if (fields[i].type === 'BYTES') {
+      } else if (fields[i].bqField.type === 'BOOLEAN') {
+        if (fields[i].cloudSqlType === 'bit(1)') {
+          row[key] = row[key] !== null ? row[key].readInt8(0) === 1 : null;
+        } else {
+          row[key] = row[key] !== null ? row[key].toString().lastIndexOf('1') !== -1 : null;
+        }
+      }  else if (fields[i].bqField.type === 'BYTES') {
         row[key] = null;
       }
       i++;
