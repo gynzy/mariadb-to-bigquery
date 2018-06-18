@@ -91,15 +91,12 @@ module.exports = class MySQLtoBigQuery {
 
               // Copies the table contents into another table
               result = result.then(() => {
+                console.log(`Copy Job started for table ${tableName} to ${destTableName}`);
+                // Table.copy returns a promise
                 return srcTable.copy(destTable)
-                  .then((results) => {
-                    job = results[0];
-                    console.log(`Copy Job ${job.id} started for table ${tableName} to ${destTableName}`);
-                    return job.promise();
-                  })
-                  .then((results) => {
-                    console.log(`Job ${job.id} completed.`);
-                    return results;
+                  .then(([job]) => {
+                    console.log(`Copy Job ${job.id} completed.`);
+                    return job;
                   });
               });
               result = result.then(() => {
