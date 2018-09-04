@@ -67,7 +67,7 @@ module.exports = class MySQLtoBigQuery {
         };
 
         console.log('=============== BQ schema ===================');
-        console.log(options);
+        console.log(JSON.stringify(options));
         console.log('=============== BQ schema ===================');
 
         const table = this.dataset.table(tableName);
@@ -183,7 +183,7 @@ module.exports = class MySQLtoBigQuery {
     const type = columnType.toLowerCase();
     if (type === 'tinyint(1)' || type === 'bit(1)') {
       return 'BOOLEAN'
-    } else if (type.match(/int\([0-9]+\)$/)) {
+    } else if (type.match(/int\([0-9]+\)(\s+(un)?signed)?$/)) {
       return 'INTEGER'
     } else if (type === 'datetime') {
       return 'TIMESTAMP'
