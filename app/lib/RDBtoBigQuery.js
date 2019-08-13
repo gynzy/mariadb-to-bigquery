@@ -49,7 +49,7 @@ module.exports = class MySQLtoBigQuery {
   _createOrUpdateTable(tableName, loadMethod) {
     return new Promise((resolve, reject) => {
 
-      this.connection.query(`DESC ${tableName};`, (error, rows, fields) => {
+      this.connection.query(`DESC \`${tableName}\`;`, (error, rows, fields) => {
         if (error) return reject(error);
 
         const json = rows.map(row => Object({
@@ -136,7 +136,7 @@ module.exports = class MySQLtoBigQuery {
         lastId = rows[0][0].maxId !== null ? rows[0][0].maxId : 0;
         console.log(`Selecting new rows for ${tableName} from ${lastId} with a limit of ${limit}.`);
         let query_suffix = (loadMethod === LOAD_METHOD_SNAPSHOT) ? '' : (' WHERE id > ' + lastId + ' ORDER BY id ASC LIMIT ' + limit)
-        let query = this.connection.query(`SELECT * FROM ${tableName}${query_suffix};`);
+        let query = this.connection.query(`SELECT * FROM \`${tableName}\`${query_suffix};`);
         query.stream({
             highWaterMark: 100
           })
