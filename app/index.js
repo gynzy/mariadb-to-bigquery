@@ -14,6 +14,9 @@ tablesToSend.forEach((table) => {
   if (tableProperties.length === 2 && (tableProperties[1] === 'append' || tableProperties[1] === 'snapshot')) {
     result = result.then(() => {
       return sqlToBq.exec(tableProperties[0],tableProperties[1]);    
+    }).catch(function (error) {
+      console.error(table, 'Error occured sending tables:', error);
+      process.exit(1);
     });
   } else {
     console.error('table option not formatted correct, use comma separated list of `tablename:append` or `tablename:snapshot`, got: ' + table);
