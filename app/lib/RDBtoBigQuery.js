@@ -25,7 +25,8 @@ module.exports = class MySQLtoBigQuery {
     // init BigQuery
     this.bq = bigquery({
       projectId: process.env.BQ_PROJECT_ID,
-      keyFilename: 'google-keyfile.json'
+      keyFilename: 'google-keyfile.json',
+      location: 'EU',
     });
 
     this.dataset = this.bq.dataset(process.env.BQ_DATASET);
